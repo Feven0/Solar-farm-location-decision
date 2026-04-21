@@ -14,9 +14,7 @@ week0/
 ├── tests/                        # Automated test suite (pytest)
 ├── app/                          # Streamlit dashboard (bonus task)
 ├── data/                         # Local data files (NOT committed to Git)
-├── dashboard_screenshots/        # Screenshots of the deployed dashboard
 ├── requirements.txt              # Production dependencies
-├── requirements-dev.txt          # Development & testing dependencies
 ├── config.py                     # Environment configuration
 ├── pytest.ini                    # Pytest configuration
 └── .gitignore                    # Files to exclude from Git
