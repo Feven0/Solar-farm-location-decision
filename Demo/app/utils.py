@@ -1,0 +1,99 @@
+import pandas as pd
+import numpy as np
+from scipy import stats
+import os
+
+def load_data(countries: list[str], data_dir: str = None) -> pd.DataFrame:
+    """Load and combine cleaned CSV files with strict column selection and memory optimization."""
+    if data_dir is None:
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        data_dir = os.path.join(project_root, "data")
+        
+    file_map = {
+        "Benin": os.path.join(data_dir, "benin_clean.csv"),
+        "Sierra Leone": os.path.join(data_dir, "sierraleone_clean.csv"),
+        "Togo": os.path.join(data_dir, "togo_clean.csv"),
+    }
+    
+    # Only load columns required for the dashboard
+    core_cols = ["Timestamp", "GHI", "DNI", "DHI", "Tamb"]
+    dtype_dict = {col: "float32" for col in core_cols if col != "Timestamp"}
+
+    frames = []
+    for country in countries:
+        path = file_map.get(country)
+        if path and os.path.exists(path):
+            # usecols significantly reduces initial load memory
+            df = pd.read_csv(path, usecols=core_cols, parse_dates=["Timestamp"], dtype=dtype_dict)
+            df["Country"] = country
+            frames.append(df)
+    return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+
+def daily_average(df: pd.DataFrame, metric: str) -> pd.DataFrame:
+    """Resample data to daily averages per country without creating full copies."""
+    if df.empty:
+        return pd.DataFrame()
+    
+    # Process only relevant subset of data
+    daily = (
+        df[['Timestamp', 'Country', metric]]
+        .set_index("Timestamp")
+        .groupby("Country")[metric]
+        .resample("D")
+        .mean()
+        .reset_index()
+    )
+    return daily
+
+
+def summary_table(df: pd.DataFrame, metrics: list[str]) -> pd.DataFrame:
+    """Return a summary table with mean, median, and std per country."""
+    agg = df.groupby("Country")[metrics].agg(["mean", "median", "std"]).round(2)
+    agg.columns = [f"{col}_{stat}" for col, stat in agg.columns]
+    return agg
+
+
+def top_regions(df: pd.DataFrame, metric: str = "GHI", top_n: int = 3) -> pd.DataFrame:
+    """Return countries ranked by average of the given metric."""
+    ranked = (
+        df.groupby("Country")[metric]
+        .mean()
+        .round(2)
+        .sort_values(ascending=False)
+        .reset_index()
+    )
+    ranked.columns = ["Country", f"Average {metric} (W/m²)"]
+    return ranked.head(top_n)
+
+
+def run_anova(df: pd.DataFrame, metric: str = "GHI") -> dict:
+    """Run ANOVA with sampling for large datasets to avoid memory errors."""
+    if df.empty:
+        return {"f_stat": 0, "p_value": 1.0}
+    
+    groups = []
+    unique_countries = df["Country"].unique()
+    
+    for country in unique_countries:
+        country_data = df[df["Country"] == country][metric].dropna()
+        # Sample if data is too large (over 100k points is overkill for ANOVA)
+        if len(country_data) > 100000:
+            country_data = country_data.sample(100000, random_state=42)
+        groups.append(country_data.values)
+    
+    if len(groups) < 2:
+        return {"f_stat": 0, "p_value": 1.0}
+        
+    f_stat, p_value = stats.f_oneway(*groups)
+    return {"f_stat": round(f_stat, 4), "p_value": p_value}
+
+
+
+
+def filter_by_date(df: pd.DataFrame, start_date, end_date) -> pd.DataFrame:
+    """Filter the dataframe by a date range."""
+    if df.empty:
+        return df
+    mask = (df["Timestamp"].dt.date >= start_date) & (df["Timestamp"].dt.date <= end_date)
+    return df.loc[mask]

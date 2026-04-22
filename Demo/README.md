@@ -17,8 +17,9 @@ week0/
 ├── requirements.txt              # Production dependencies
 ├── config.py                     # Environment configuration
 ├── pytest.ini                    # Pytest configuration
-└── .gitignore                    # Files to exclude from Git
+└── .gitignore                     # Files to exclude from Git
 ```
+
 
 ## Setup
 
