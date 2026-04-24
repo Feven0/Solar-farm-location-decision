@@ -117,16 +117,30 @@ if not selected_countries:
     st.stop()
 
 # ── Data Loading & Processing ────────────────────────────────────────────────
-with st.spinner(" Harvesting solar data..."):
-    df_raw = load_data(selected_countries)
-    
-    if df_raw.empty:
-        st.error("Could not load data. Please check if the datasets exist in the 'data/' folder.")
-        st.stop()
+with st.spinner("✨ Harvesting solar data..."):
+    try:
+        df_raw = load_data(selected_countries)
         
-    df = filter_by_date(df_raw, date_range[0].date(), date_range[1].date())
-    # Reduced sampling for browser-side performance (prevents charts from getting 'stuck')
-    df_viz_sample = df.sample(min(10000, len(df)), random_state=42) if len(df) > 10000 else df
+        if df_raw.empty:
+            st.error("The data pantry is empty! No files were found for the selected countries.")
+            # Diagnostic info for debugging
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            project_root = os.path.dirname(current_dir)
+            data_dir = os.path.join(project_root, "data")
+            st.write(f"**Diagnostic Path:** `{data_dir}`")
+            if os.path.exists(data_dir):
+                st.write(f"**Files found:** {os.listdir(data_dir)}")
+            else:
+                st.error("The `data/` directory does not even exist at that path!")
+            st.stop()
+            
+        df = filter_by_date(df_raw, date_range[0].date(), date_range[1].date())
+        # Reduced sampling for browser-side performance (prevents charts from getting 'stuck')
+        df_viz_sample = df.sample(min(10000, len(df)), random_state=42) if len(df) > 10000 else df
+    except Exception as e:
+        st.error(f"🚀 **App Crash Report**: {e}")
+        st.exception(e)
+        st.stop()
 
 # ── KPI Section ──────────────────────────────────────────────────────────────
 st.subheader("Key Performance Indicators")
