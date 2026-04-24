@@ -5,17 +5,24 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 import pandas as pd
+import sys
+import os
+
+# Ensure the app can find utils.py regardless of how it's started
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+if curr_dir not in sys.path:
+    sys.path.insert(0, curr_dir)
 
 from utils import load_data, summary_table, top_regions, run_anova, daily_average, filter_by_date
 
-# ── Page configuration ──────────────────────────────────────────────────────
+# Page configuration
 st.set_page_config(
     page_title="Solar Farm Analytics | MoonLight Energy",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# ── Custom CSS for Premium Look ──────────────────────────────────────────────
+#  Custom CSS for better Look 
 st.markdown("""
     <style>
     .main {
@@ -106,11 +113,11 @@ with st.sidebar:
 
 # ── Guard Logic ──────────────────────────────────────────────────────────────
 if not selected_countries:
-    st.error("⚠️ Please select at least one country to begin analysis.")
+    st.error(" Please select at least one country to begin analysis.")
     st.stop()
 
 # ── Data Loading & Processing ────────────────────────────────────────────────
-with st.spinner("✨ Harvesting solar data..."):
+with st.spinner(" Harvesting solar data..."):
     df_raw = load_data(selected_countries)
     
     if df_raw.empty:
