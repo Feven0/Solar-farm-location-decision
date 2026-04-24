@@ -8,7 +8,10 @@ import streamlit as st
 def load_data(countries: list[str], data_dir: str = None) -> pd.DataFrame:
     """Load and combine cleaned CSV files with strict column selection and memory optimization."""
     if data_dir is None:
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # Find path to 'data' relative to this file (Demo/app/utils.py)
+        # current_file = /mount/src/solar-farm-location-decision/Demo/app/utils.py
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(current_dir)
         data_dir = os.path.join(project_root, "data")
         
     file_map = {
