@@ -5,8 +5,13 @@ import os
 import streamlit as st
 
 @st.cache_data
-def load_data(countries: list[str], data_dir: str = None) -> pd.DataFrame:
-    """Load and combine cleaned CSV files with strict column selection and memory optimization."""
+def load_data(countries: list[str], data_dir: str = None, sample_only: bool = True, sample_rows: int = 10000) -> pd.DataFrame:
+    """Load and combine cleaned CSV files with strict column selection and memory optimization.
+
+    By default this function loads a sampled subset of each CSV (`sample_only=True`) to
+    speed up startup (useful for cloud deployments). Set `sample_only=False` to load the
+    full CSVs.
+    """
     if data_dir is None:
         # Find path to 'data' relative to this file (Demo/app/utils.py)
         # current_file = /mount/src/solar-farm-location-decision/Demo/app/utils.py
@@ -27,11 +32,26 @@ def load_data(countries: list[str], data_dir: str = None) -> pd.DataFrame:
     frames = []
     for country in countries:
         path = file_map.get(country)
-        if path and os.path.exists(path):
-            # usecols significantly reduces initial load memory
-            df = pd.read_csv(path, usecols=core_cols, parse_dates=["Timestamp"], dtype=dtype_dict)
-            df["Country"] = country
-            frames.append(df)
+        if path:
+            # Prefer Parquet if available (faster & smaller on disk)
+            parquet_path = os.path.splitext(path)[0] + ".parquet"
+            if os.path.exists(parquet_path):
+                df = pd.read_parquet(parquet_path)
+                # ensure required cols
+                df = df[[c for c in core_cols if c in df.columns]]
+                df["Country"] = country
+                frames.append(df)
+                continue
+
+            if os.path.exists(path):
+                # usecols significantly reduces initial load memory
+                # sample_only loads only the first `sample_rows` to speed startup
+                if sample_only:
+                    df = pd.read_csv(path, usecols=core_cols, parse_dates=["Timestamp"], dtype=dtype_dict, nrows=sample_rows)
+                else:
+                    df = pd.read_csv(path, usecols=core_cols, parse_dates=["Timestamp"], dtype=dtype_dict)
+                df["Country"] = country
+                frames.append(df)
     return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
 

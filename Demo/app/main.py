@@ -109,6 +109,9 @@ with st.sidebar:
         format="MMM YYYY"
     )
 
+    # Control how much data to load on startup. Loading full CSVs can be slow on cloud.
+    full_load = st.checkbox("Load full dataset (may be slow on deployment)", value=False)
+
     st.divider()
 
 # ── Guard Logic ──────────────────────────────────────────────────────────────
@@ -119,7 +122,8 @@ if not selected_countries:
 # ── Data Loading & Processing ────────────────────────────────────────────────
 with st.spinner("✨ Harvesting solar data..."):
     try:
-        df_raw = load_data(selected_countries)
+        # If `full_load` is False we only load a sampled subset for fast startup on cloud.
+        df_raw = load_data(selected_countries, sample_only=not full_load)
         
         if df_raw.empty:
             st.error("The data pantry is empty! No files were found for the selected countries.")
@@ -168,7 +172,7 @@ with tab_summary:
     # Add Tamb if it exists
     cols_to_use = [c for c in m_cols if c in df.columns]
     stats = summary_table(df, cols_to_use)
-    st.dataframe(stats, width='stretch')
+    st.dataframe(stats)
 
     st.divider()
     col_anova, col_info = st.columns([1, 1])
@@ -206,7 +210,7 @@ with tab_charts:
         labels={"Timestamp": "Date", selected_metric: f"{selected_metric} (W/m²)"}
     )
     fig_line.update_layout(hovermode="x unified", legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-    st.plotly_chart(fig_line, width='stretch')
+    st.plotly_chart(fig_line, use_container_width=True)
 
 # -- TAB 3: DISTRIBUTION --
 with tab_dist:
@@ -224,7 +228,7 @@ with tab_dist:
             template="plotly_white",
             points=False # Hide outliers for cleaner look
         )
-        st.plotly_chart(fig_box, width='stretch')
+        st.plotly_chart(fig_box, use_container_width=True)
     
     with col_hist:
         fig_hist = px.histogram(
@@ -236,7 +240,7 @@ with tab_dist:
             template="plotly_white",
             nbins=50
         )
-        st.plotly_chart(fig_hist, width='stretch')
+        st.plotly_chart(fig_hist, use_container_width=True)
 
 # -- TAB 4: RANKINGS --
 with tab_rankings:
@@ -259,7 +263,7 @@ with tab_rankings:
             template="plotly_white"
         )
         fig_bar.update_traces(textfont_size=12, textangle=0, textposition="outside", cliponaxis=False)
-        st.plotly_chart(fig_bar, width='stretch')
+        st.plotly_chart(fig_bar, use_container_width=True)
 
 # ── Footer ───────────────────────────────────────────────────────────────────
 st.divider()
