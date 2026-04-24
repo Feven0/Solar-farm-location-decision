@@ -6,15 +6,11 @@ import streamlit as st
 
 @st.cache_data
 def load_data(countries: list[str], data_dir: str = None, sample_only: bool = True, sample_rows: int = 10000) -> pd.DataFrame:
-    """Load and combine cleaned CSV files with strict column selection and memory optimization.
-
-    By default this function loads a sampled subset of each CSV (`sample_only=True`) to
-    speed up startup (useful for cloud deployments). Set `sample_only=False` to load the
-    full CSVs.
-    """
+  
+  
     if data_dir is None:
-        # Find path to 'data' relative to this file (Demo/app/utils.py)
-        # current_file = /mount/src/solar-farm-location-decision/Demo/app/utils.py
+      
+      
         current_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(current_dir)
         data_dir = os.path.join(project_root, "data")

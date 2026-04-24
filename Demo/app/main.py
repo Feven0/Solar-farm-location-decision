@@ -1,7 +1,6 @@
 import streamlit as st
 
-# Import plotting libraries with graceful fallback for environments
-# where binary wheels may not be available (e.g., Streamlit Cloud build issues).
+
 HAS_MPL = False
 try:
     import matplotlib.pyplot as plt
@@ -18,7 +17,7 @@ import pandas as pd
 import sys
 import os
 
-# Ensure the app can find utils.py regardless of how it's started
+
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 if curr_dir not in sys.path:
     sys.path.insert(0, curr_dir)
@@ -73,7 +72,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# ── Global Settings ──────────────────────────────────────────────────────────
+#  Global color Settings
 COLORS = {"Benin": "#636EFA", "Sierra Leone": "#EF553B", "Togo": "#00CC96"}
 
 # ── Header ───────────────────────────────────────────────────────────────────
@@ -124,13 +123,13 @@ with st.sidebar:
 
     st.divider()
 
-# ── Guard Logic ──────────────────────────────────────────────────────────────
+#  Guard Logic 
 if not selected_countries:
     st.error(" Please select at least one country to begin analysis.")
     st.stop()
 
-# ── Data Loading & Processing ────────────────────────────────────────────────
-with st.spinner("✨ Harvesting solar data..."):
+#  Data Loading & Processing ────────────────────────────────────────────────
+with st.spinner(" Harvesting solar data..."):
     try:
         # If `full_load` is False we only load a sampled subset for fast startup on cloud.
         df_raw = load_data(selected_countries, sample_only=not full_load)
@@ -152,7 +151,7 @@ with st.spinner("✨ Harvesting solar data..."):
         # Reduced sampling for browser-side performance (prevents charts from getting 'stuck')
         df_viz_sample = df.sample(min(10000, len(df)), random_state=42) if len(df) > 10000 else df
     except Exception as e:
-        st.error(f"🚀 **App Crash Report**: {e}")
+        st.error(f" **App Crash Report**: {e}")
         st.exception(e)
         st.stop()
 
