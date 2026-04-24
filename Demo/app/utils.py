@@ -2,7 +2,9 @@ import pandas as pd
 import numpy as np
 from scipy import stats
 import os
+import streamlit as st
 
+@st.cache_data
 def load_data(countries: list[str], data_dir: str = None) -> pd.DataFrame:
     """Load and combine cleaned CSV files with strict column selection and memory optimization."""
     if data_dir is None:
