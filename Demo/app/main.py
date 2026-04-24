@@ -1,6 +1,16 @@
 import streamlit as st
-import matplotlib.pyplot as plt
-import seaborn as sns
+
+# Import plotting libraries with graceful fallback for environments
+# where binary wheels may not be available (e.g., Streamlit Cloud build issues).
+HAS_MPL = False
+try:
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    HAS_MPL = True
+except Exception:
+    plt = None
+    sns = None
+    st.warning("Matplotlib/Seaborn unavailable — falling back to Plotly for charts.")
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
