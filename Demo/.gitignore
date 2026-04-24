@@ -1,9 +1,9 @@
-# Project-specific: block raw CSVs but allow cleaned data for the dashboard
-**/benin-malanville.csv
-**/sierraleone-bumbuna.csv
-**/togo-dapaong.csv
-# data/ (Removed this to allow cleaned files)
-# *.csv (Removed this to allow cleaned files)
+# Project-specific: block all CSVs by default but allow cleaned data for the dashboard
+*.csv
+data/
+!**/benin_clean.csv
+!**/sierraleone_clean.csv
+!**/togo_clean.csv
 
 # Jupyter Notebooks checkpoints
 .ipynb_checkpoints/
