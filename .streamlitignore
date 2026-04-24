@@ -1,0 +1,11 @@
+# Ignore large files not needed for the live dashboard
+**/*.ipynb
+**/notebooks/
+**/scripts/
+**/scratch/
+**/benin-malanville.csv
+**/sierraleone-bumbuna.csv
+**/togo-dapaong.csv
+.git
+.vscode
+.venv
