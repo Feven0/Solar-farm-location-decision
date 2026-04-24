@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Project Scripts
 
 This directory contains utility scripts for data processing and analysis.
@@ -16,12 +15,3 @@ The dashboard in the `app/` folder leverages these scripts (integrated into `uti
 
 ## Usage
 Most functions are imported directly by `app/main.py`. If you wish to run analysis separately, you can import from `utils`.
-=======
-# Scripts
-
-This folder contains standalone Python scripts for data processing and automation.
-
-## Usage
-
-Add your scripts here for tasks like data fetching, preprocessing, or batch operations.
->>>>>>> 143168d (edits)
